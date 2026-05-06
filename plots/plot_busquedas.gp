@@ -15,7 +15,8 @@ set style data linespoints
 set key autotitle columnheader
 
 plot "docs/benchmark_busquedas.csv" using 1:2 title "Busqueda Secuencial" lw 2 lc rgb "red", \
-     "docs/benchmark_busquedas.csv" using 1:3 title "Busqueda Binaria" lw 2 lc rgb "blue"
+     "docs/benchmark_busquedas.csv" using 1:3 title "Busqueda Binaria" lw 2 lc rgb "blue", \
+     "docs/benchmark_busquedas.csv" using 1:4 title "Quiq select" lw 2 lc rgb "green"
 
 # grafico individual busqueda secuencial
 set output "plots/sequentialsearch/busqueda_secuencial.png"
@@ -26,3 +27,8 @@ plot "docs/benchmark_busquedas.csv" using 1:2 title "Secuencial" lw 2 lc rgb "re
 set output "plots/binarysearch/busqueda_binaria.png"
 set title "Busqueda Binaria - tiempo de ejecucion"
 plot "docs/benchmark_busquedas.csv" using 1:3 title "Binaria" lw 2 lc rgb "blue"
+
+# grafico individual quick select
+set output "plots/binarysearch/quick_select.png"
+set title "Quick Select - tiempo de ejecucion"
+plot "docs/benchmark_busquedas.csv" using 1:4 title "Quiq select" lw 2 lc rgb "green"

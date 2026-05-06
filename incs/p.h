@@ -22,20 +22,19 @@ int comparar(piloto a, piloto b, int campo);
 piloto inicializar_piloto(int registro, piloto a);
 piloto* crear_lista(int tamano);
 void buble_sort(piloto p[], int tamano, int campo);
+int quick_select(piloto p[], int izq, int der, int k, int campo);
+int partition(piloto p[], int izq, int der, int campo);
 void insertion_sort(piloto p[], int tamano, int campo);
 void selection_sort(piloto p[], int tamano, int campo);
 void cocktail_shaker_sort(piloto p[], int tamano, int campo);
 void fisher_yates(piloto p[], int tamano);
 int busqueda_secuencial(piloto p[], int tamano, int id_buscado);
 int busqueda_binaria_id(piloto p[], int tamano, int id_buscado);
-int busqueda_binaria_recursiva(piloto p[], int id_buscado, int bajo, int alto);
-int busqueda_interpolacion(piloto p[], int tamano, int id_buscado);
-int busqueda_exponencial(piloto p[], int tamano, int id_buscado);
-void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado);
 void guardar_en_csv(piloto lista[], int tamano, const char* nombre_archivo);
 piloto* leer_csv(const char* nombre_archivo, int tamano_esperado);
 void benchmark_sorts(int tamanios[], int n_tamanios);
 void benchmark_busquedas(int tamanios[], int n_tamanios);
+double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo);
 
 // ====================== COMPARADOR POR CAMPO ======================
 // compara dos pilotos segun el campo indicado:
@@ -91,7 +90,7 @@ piloto* crear_lista(int tamano){
 }
 
 // ====================== ALGORITMOS DE ORDENAMIENTO ======================
-// los algoritmos de busqueda y ordenamientos fueron inspirados de https://www.geeksforgeeks.org/
+// los algoritmos de busqueda , ordenamientos y quick select fueron inspirados de https://www.geeksforgeeks.org/
 // todos reciben el campo a ordenar: 1=Id, 2=Nombre, 3=Equipo, 4=Puntaje, 5=Competencias
 
 // bubble sort con optimizacion para detectar arreglos ya ordenados
@@ -114,6 +113,40 @@ void buble_sort(piloto p[], int tamano, int campo){
             break;
         }
     }
+}
+
+// quick select con optimizacion para detectar arreglos ya ordenados
+int partition(piloto p[], int izq, int der, int campo){
+    piloto paux;
+    piloto par = p[der];
+    int i = (izq - 1);
+    int j;
+    for (j = izq; j <= der; j++){
+        if(comparar(p[j], par, campo) < 0){
+            i++;
+            paux = p[j];
+            p[j] = p[i];
+            p[i] = paux;
+        }
+    }
+    paux = p[i+1];
+    p[i+1] = p[der];
+    p[der] = paux;
+    return (i + 1);
+}
+
+int quick_select(piloto p[], int izq, int der, int k, int campo){
+    int pivote = partition(p,izq,der,campo);
+    if(pivote == k - 1){
+        return pivote;
+    }
+    else if(pivote > k - 1){
+        return quick_select(p,izq,pivote-1,k,campo);
+    }
+    else{
+        return quick_select(p,pivote+1,der,k,campo);
+    }
+    return -1;
 }
 
 // insertion sort estandar
@@ -229,99 +262,6 @@ int busqueda_binaria_id(piloto p[], int tamano, int id_buscado){
     return -1;
 }
 
-int busqueda_binaria_recursiva(piloto p[], int id_buscado, int bajo, int alto) {
-    if (bajo > alto) {
-        return -1; // Si no se encontro
-    }
-    
-    int mid = bajo + (alto - bajo) / 2;
-    
-    if (p[mid].Id == id_buscado) return mid;
-    
-    if (p[mid].Id > id_buscado) {
-        return busqueda_binaria_recursiva(p, id_buscado, bajo, mid - 1);
-    } else {
-        return busqueda_binaria_recursiva(p, id_buscado, mid + 1, alto);
-    }
-}
-
-int busqueda_interpolacion(piloto p[], int tamano, int id_buscado) {
-    int bajo = 0, alto = tamano - 1;
-
-    while (bajo <= alto && id_buscado >= p[bajo].Id && id_buscado <= p[alto].Id) {
-        if (bajo == alto) {
-            if (p[bajo].Id == id_buscado) return bajo;
-            return -1;
-        }
-
-        // aplicacion de la formula
-        int pos = bajo + (((double)(alto - bajo) / (p[alto].Id - p[bajo].Id)) * (id_buscado - p[bajo].Id));
-
-        if (p[pos].Id == id_buscado) return pos;
-        if (p[pos].Id < id_buscado) bajo = pos + 1;
-        else alto = pos - 1;
-    }
-    return -1;
-}
-
-int busqueda_exponencial(piloto p[], int tamano, int id_buscado) {
-    if (p[0].Id == id_buscado) return 0;
-
-    int i = 1;
-    while (i < tamano && p[i].Id <= id_buscado) {
-        i = i * 2;
-    }
-
-    // Llama a la funcion recursiva para el rango encontrado
-    // Usamos fmin para no pasarnos del tamaño del arreglo
-    return busqueda_binaria_recursiva(p, id_buscado, i / 2, fmin(i, tamano - 1));
-}
-
-void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado) {
-    int bajo = 0, alto = tamano - 1;
-    int encontrado = -1;
-    // en esta busqueda se implementara la busqueda de rango por puntaje
-    // ya que si se hace por id, como estos son unicos no habran repetidos
-
-
-    // busqueda binaria normal, como la busqueda binaria era por id
-    // se implemento nuevamente en un while
-    while (bajo <= alto) {
-        int mid = bajo + (alto - bajo) / 2;
-        if (p[mid].Puntaje == puntaje_buscado) {
-            encontrado = mid;
-            break;
-        } else if (p[mid].Puntaje < puntaje_buscado) {
-            bajo = mid + 1;
-        } else {
-            alto = mid - 1;
-        }
-    }
-
-    if (encontrado == -1) {
-        printf("No se encontro a nadie con %.2f puntos.\n", puntaje_buscado);
-        return;
-    }
-
-    // luego se expande hacia la izquierda para buscar el inicio del rango
-    int primera_pos = encontrado;
-    while (primera_pos > 0 && p[primera_pos - 1].Puntaje == puntaje_buscado) {
-        primera_pos--;
-    }
-
-    // se expande hacia la derecha para buscar el final del rango
-    int ultima_pos = encontrado;
-    while (ultima_pos < tamano - 1 && p[ultima_pos + 1].Puntaje == puntaje_buscado) {
-        ultima_pos++;
-    }
-
-    printf("El puntaje %.2f aparece desde la posicion %d hasta la %d.\n", puntaje_buscado, primera_pos, ultima_pos);
-    
-    // imprimir los deportistas en ese rango
-    for(int i = primera_pos; i <= ultima_pos; i++){
-        printf("- %s (Equipo: %s)\n", p[i].Nombre, p[i].Equipo);
-    }
-}
 // ====================== CSV ======================
 // el guardar csv y el leer csv fueron hechos por grok
 
@@ -425,6 +365,14 @@ double medir_tiempo_busqueda(func_busqueda fn, piloto p[], int tamano, int id){
     return (double)(fin - inicio) / CLOCKS_PER_SEC;
 }
 
+double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo){
+    clock_t inicio = clock();
+    int aux;
+    aux = quick_select(p, izq, der, id, campo);
+    clock_t fin = clock();
+    return (double)(fin - inicio) / CLOCKS_PER_SEC;
+}
+
 // corre el benchmark completo y guarda resultados en CSV
 // tamanios[] es el arreglo de tamanios a probar, n_tamanios es cuantos hay
 void benchmark_sorts(int tamanios[], int n_tamanios){
@@ -467,11 +415,11 @@ void benchmark_sorts(int tamanios[], int n_tamanios){
 void benchmark_busquedas(int tamanios[], int n_tamanios){
     int t;
     printf("\n=== BENCHMARK BUSQUEDA ===\n");
-    printf("%-12s %-20s %-20s\n", "Tamano", "Secuencial(peor)", "Binaria(peor)");
+    printf("%-12s %-20s %-20s %-20s\n", "Tamano", "Secuencial(peor)", "Binaria(peor)", "quiqck select(nose)");
 
     FILE* f = fopen("docs/benchmark_busquedas.csv", "w");
     if(f != NULL){
-        fprintf(f, "Tamano,Secuencial,Binaria\n");
+        fprintf(f, "Tamano,Secuencial,Binaria,quiqck select\n");
     }
 
     for(t=0; t<n_tamanios; t++){
@@ -481,15 +429,18 @@ void benchmark_busquedas(int tamanios[], int n_tamanios){
         // peor caso secuencial: buscar un id que no existe (-1)
         double ts = medir_tiempo_busqueda(busqueda_secuencial, lista, tam, -1);
 
-        // para binaria primero ordenamos por id (requisito)
         buble_sort(lista, tam, 1);
+
+        // qiqck sort peor caso
+        double qs = medir_tiempo_qs(lista, 0, tam -1, (tam/2), 1);
+
         // peor caso binaria: buscar un id que no existe (-1)
         double tb = medir_tiempo_busqueda(busqueda_binaria_id, lista, tam, -1);
 
-        printf("%-12d %-20.6f %-20.6f\n", tam, ts, tb);
+        printf("%-12d %-20.6f %-20.6f %-20.6f\n", tam, ts, tb, qs);
 
         if(f != NULL){
-            fprintf(f, "%d,%.6f,%.6f\n", tam, ts, tb);
+            fprintf(f, "%d,%.6f,%.6f,%.6f\n", tam, ts, tb,qs);
         }
 
         free(lista);
