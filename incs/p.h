@@ -39,6 +39,20 @@ piloto* leer_csv(const char* nombre_archivo, int tamano_esperado);
 void benchmark_sorts(int tamanios[], int n_tamanios);
 void benchmark_busquedas(int tamanios[], int n_tamanios);
 double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo);
+void merge(piloto p[], int tamano, int campo);
+void quick_sort(piloto p[], int tamano, int campo);
+void merge_benchmark(piloto p[], int tamano, int campo);
+void merge_optimizado_benchmark(piloto p[], int tamano, int campo);
+void quick_ultimo_benchmark(piloto p[], int tamano, int campo);
+void quick_mediana_benchmark(piloto p[], int tamano, int campo);
+void mezclar(piloto p[], int izq, int medio, int der, int campo);
+void merge_recursivo(piloto p[], int izq, int der, int campo);
+void merge_optimizado_recursivo(piloto p[], int izq, int der, int campo, int umbral);
+void insertion_sort_rango(piloto p[], int izq, int der, int campo);
+void swap_piloto(piloto *a, piloto *b);
+int seleccionar_pivote(piloto p[], int izq, int der, int campo, int tipo_pivote);
+int partition_quick_sort(piloto p[], int izq, int der, int campo, int tipo_pivote);
+void quick_sort_recursivo(piloto p[], int izq, int der, int campo, int tipo_pivote);
 
 // ====================== COMPARADOR POR CAMPO ======================
 // compara dos pilotos segun el campo indicado:
@@ -219,6 +233,255 @@ void cocktail_shaker_sort(piloto p[], int tamano, int campo){
         }
         izq++;
     } while(swap && izq < der);
+}
+
+// MERGE SORT - Mezcla 2 mitades ya ordenadas
+void mezclar(piloto p[], int izq, int medio, int der, int campo){
+    int n1 = medio - izq + 1;
+    int n2 = der - medio;
+
+    piloto *izquierda = (piloto*)malloc(n1 * sizeof(piloto));
+    piloto *derecha = (piloto*)malloc(n2 * sizeof(piloto));
+
+    if(izquierda == NULL || derecha == NULL){
+        printf("Error al reservar memoria en merge sort\n");
+        free(izquierda);
+        free(derecha);
+        return;
+    }
+
+    for(int i = 0; i < n1; i++){
+        izquierda[i] = p[izq + i];
+    }
+
+    for(int j = 0; j < n2; j++){
+        derecha[j] = p[medio + 1 + j];
+    }
+
+    int i = 0;
+    int j = 0;
+    int k = izq;
+
+    while(i < n1 && j < n2){
+        if(comparar(izquierda[i], derecha[j], campo) <= 0){
+            p[k] = izquierda[i];
+            i++;
+        }
+        else{
+            p[k] = derecha[j];
+            j++;
+        }
+        k++;
+    }
+
+    while(i < n1){
+        p[k] = izquierda[i];
+        i++;
+        k++;
+    }
+
+    while(j < n2){
+        p[k] = derecha[j];
+        j++;
+        k++;
+    }
+
+    free(izquierda);
+    free(derecha);
+}
+
+// merge sort clasico recursivo
+void merge_recursivo(piloto p[], int izq, int der, int campo){
+    if(izq < der){
+        int medio = izq + (der - izq) / 2;
+
+        merge_recursivo(p, izq, medio, campo);
+        merge_recursivo(p, medio + 1, der, campo);
+
+        mezclar(p, izq, medio, der, campo);
+    }
+}
+
+// insertion sort aplicado solo a un rango del arreglo
+// se usa para el merge sort optimizado
+void insertion_sort_rango(piloto p[], int izq, int der, int campo){
+    piloto key;
+    int i;
+    int j;
+
+    for(i = izq + 1; i <= der; i++){
+        key = p[i];
+        j = i - 1;
+
+        while(j >= izq && comparar(p[j], key, campo) > 0){
+            p[j + 1] = p[j];
+            j--;
+        }
+
+        p[j + 1] = key;
+    }
+}
+
+// merge sort optimizado con insertion sort para arreglos pequenos
+void merge_optimizado_recursivo(piloto p[], int izq, int der, int campo, int umbral){
+    if(izq >= der){
+        return;
+    }
+
+    if((der - izq + 1) <= umbral){
+        insertion_sort_rango(p, izq, der, campo);
+        return;
+    }
+
+    int medio = izq + (der - izq) / 2;
+
+    merge_optimizado_recursivo(p, izq, medio, campo, umbral);
+    merge_optimizado_recursivo(p, medio + 1, der, campo, umbral);
+
+    mezclar(p, izq, medio, der, campo);
+}
+
+// funcion principal que llama el main
+void merge(piloto p[], int tamano, int campo){
+    int opcion;
+    int umbral;
+
+    printf("\nTipo de Merge Sort:\n");
+    printf("1. Clasico\n");
+    printf("2. Optimizado con Insertion Sort\n");
+    printf("Opcion: ");
+    scanf("%d", &opcion);
+
+    if(opcion == 1){
+        merge_recursivo(p, 0, tamano - 1, campo);
+    }
+    else if(opcion == 2){
+        printf("Ingrese umbral para usar Insertion Sort, por ejemplo 10, 20 o 30: ");
+        scanf("%d", &umbral);
+
+        if(umbral <= 0){
+            umbral = 20;
+        }
+
+        merge_optimizado_recursivo(p, 0, tamano - 1, campo, umbral);
+    }
+    else{
+        printf("Opcion invalida\n");
+    }
+}
+
+// QUICK SORT
+// intercambia dos pilotos
+void swap_piloto(piloto *a, piloto *b){
+    piloto aux = *a;
+    *a = *b;
+    *b = aux;
+}
+
+// seleccion del pivote:
+// 1 = ultimo elemento
+// 2 = primer elemento
+// 3 = aleatorio
+// 4 = mediana de tres
+int seleccionar_pivote(piloto p[], int izq, int der, int campo, int tipo_pivote){
+    if(tipo_pivote == 1){
+        return der;
+    }
+    else if(tipo_pivote == 2){
+        return izq;
+    }
+    else if(tipo_pivote == 3){
+        return izq + rand() % (der - izq + 1);
+    }
+    else if(tipo_pivote == 4){
+        int medio = izq + (der - izq) / 2;
+
+        piloto a = p[izq];
+        piloto b = p[medio];
+        piloto c = p[der];
+
+        if((comparar(a, b, campo) <= 0 && comparar(b, c, campo) <= 0) ||
+           (comparar(c, b, campo) <= 0 && comparar(b, a, campo) <= 0)){
+            return medio;
+        }
+
+        if((comparar(b, a, campo) <= 0 && comparar(a, c, campo) <= 0) ||
+           (comparar(c, a, campo) <= 0 && comparar(a, b, campo) <= 0)){
+            return izq;
+        }
+
+        return der;
+    }
+
+    return der;
+}
+
+// particion de Lomuto para quick sort
+int partition_quick_sort(piloto p[], int izq, int der, int campo, int tipo_pivote){
+    int indice_pivote = seleccionar_pivote(p, izq, der, campo, tipo_pivote);
+
+    // Lomuto trabaja con el pivote al final, por eso se mueve el pivote elegido a der
+    swap_piloto(&p[indice_pivote], &p[der]);
+
+    piloto pivote = p[der];
+    int i = izq - 1;
+
+    for(int j = izq; j <= der - 1; j++){
+        if(comparar(p[j], pivote, campo) <= 0){
+            i++;
+            swap_piloto(&p[i], &p[j]);
+        }
+    }
+
+    swap_piloto(&p[i + 1], &p[der]);
+    return i + 1;
+}
+
+// quick sort recursivo
+void quick_sort_recursivo(piloto p[], int izq, int der, int campo, int tipo_pivote){
+    if(izq < der){
+        int pivote = partition_quick_sort(p, izq, der, campo, tipo_pivote);
+
+        quick_sort_recursivo(p, izq, pivote - 1, campo, tipo_pivote);
+        quick_sort_recursivo(p, pivote + 1, der, campo, tipo_pivote);
+    }
+}
+
+// funcion principal que llama el main
+void quick_sort(piloto p[], int tamano, int campo){
+    int tipo_pivote;
+
+    printf("\nTipo de pivote para Quick Sort:\n");
+    printf("1. Ultimo elemento\n");
+    printf("2. Primer elemento\n");
+    printf("3. Elemento aleatorio\n");
+    printf("4. Mediana de tres\n");
+    printf("Opcion: ");
+    scanf("%d", &tipo_pivote);
+
+    if(tipo_pivote >= 1 && tipo_pivote <= 4){
+        quick_sort_recursivo(p, 0, tamano - 1, campo, tipo_pivote);
+    }
+    else{
+        printf("Tipo de pivote invalido\n");
+    }
+}
+
+void merge_benchmark(piloto p[], int tamano, int campo){
+    merge_recursivo(p, 0, tamano - 1, campo);
+}
+
+void merge_optimizado_benchmark(piloto p[], int tamano, int campo){
+    int umbral = 20;
+    merge_optimizado_recursivo(p, 0, tamano - 1, campo, umbral);
+}
+
+void quick_ultimo_benchmark(piloto p[], int tamano, int campo){
+    quick_sort_recursivo(p, 0, tamano - 1, campo, 1);
+}
+
+void quick_mediana_benchmark(piloto p[], int tamano, int campo){
+    quick_sort_recursivo(p, 0, tamano - 1, campo, 4);
 }
 
 // ====================== MEZCLAR ======================
@@ -464,8 +727,7 @@ double medir_tiempo_busqueda(func_busqueda fn, piloto p[], int tamano, int id){
 
 double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo){
     clock_t inicio = clock();
-    int aux;
-    aux = quick_select(p, izq, der, id, campo);
+    quick_select(p, izq, der, id, campo);
     clock_t fin = clock();
     return (double)(fin - inicio) / CLOCKS_PER_SEC;
 }
@@ -475,12 +737,14 @@ double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo){
 void benchmark_sorts(int tamanios[], int n_tamanios){
     int t;
     printf("\n=== BENCHMARK ORDENAMIENTO ===\n");
-    printf("%-12s %-15s %-15s %-15s %-15s\n", "Tamano", "Bubble", "Insertion", "Selection", "Cocktail");
+    printf("%-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s\n",
+       "Tamano", "Bubble", "Insertion", "Selection", "Cocktail",
+       "Merge", "MergeOpt", "QuickUlt", "QuickMed");
 
     // guardar en CSV para graficos
     FILE* f = fopen("docs/benchmark_sorts.csv", "w");
     if(f != NULL){
-        fprintf(f, "Tamano,Bubble,Insertion,Selection,Cocktail\n");
+        fprintf(f, "Tamano,Bubble,Insertion,Selection,Cocktail,Merge,MergeOpt,QuickUlt,QuickMed\n");
     }
 
     for(t=0; t<n_tamanios; t++){
@@ -489,15 +753,22 @@ void benchmark_sorts(int tamanios[], int n_tamanios){
         fisher_yates(lista, tam);
 
         // ordenar por puntaje (campo 4) en todos
-        double tb = medir_tiempo_sort(buble_sort,            lista, tam, 4);
-        double ti = medir_tiempo_sort(insertion_sort,        lista, tam, 4);
-        double ts = medir_tiempo_sort(selection_sort,        lista, tam, 4);
-        double tc = medir_tiempo_sort(cocktail_shaker_sort,  lista, tam, 4);
+        double tb = medir_tiempo_sort(buble_sort,                   lista, tam, 4);
+        double ti = medir_tiempo_sort(insertion_sort,               lista, tam, 4);
+        double ts = medir_tiempo_sort(selection_sort,               lista, tam, 4);
+        double tc = medir_tiempo_sort(cocktail_shaker_sort,         lista, tam, 4);
 
-        printf("%-12d %-15.6f %-15.6f %-15.6f %-15.6f\n", tam, tb, ti, ts, tc);
+        double tm = medir_tiempo_sort(merge_benchmark,              lista, tam, 4);
+        double tmo = medir_tiempo_sort(merge_optimizado_benchmark,  lista, tam, 4);
+        double tq1 = medir_tiempo_sort(quick_ultimo_benchmark,      lista, tam, 4);
+        double tq4 = medir_tiempo_sort(quick_mediana_benchmark,     lista, tam, 4);
+
+        printf("%-12d %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f\n",
+            tam, tb, ti, ts, tc, tm, tmo, tq1, tq4);
 
         if(f != NULL){
-            fprintf(f, "%d,%.6f,%.6f,%.6f,%.6f\n", tam, tb, ti, ts, tc);
+            fprintf(f, "%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
+                tam, tb, ti, ts, tc, tm, tmo, tq1, tq4);
         }
 
         free(lista);
@@ -512,11 +783,11 @@ void benchmark_sorts(int tamanios[], int n_tamanios){
 void benchmark_busquedas(int tamanios[], int n_tamanios){
     int t;
     printf("\n=== BENCHMARK BUSQUEDA ===\n");
-    printf("%-12s %-20s %-20s %-20s\n", "Tamano", "Secuencial(peor)", "Binaria(peor)", "quiqck select(nose)");
+    printf("%-12s %-20s %-20s %-20s\n", "Tamano", "Secuencial(peor)", "Binaria(peor)", "QuickSelect(k)");
 
     FILE* f = fopen("docs/benchmark_busquedas.csv", "w");
     if(f != NULL){
-        fprintf(f, "Tamano,Secuencial,Binaria,quiqck select\n");
+        fprintf(f, "Tamano,Secuencial(peor),Binaria(peor),QuickSelect(k)\n");
     }
 
     for(t=0; t<n_tamanios; t++){

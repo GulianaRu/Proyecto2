@@ -40,7 +40,7 @@ int main(){
                 printf("Campo: ");
                 scanf("%d", &campo);
                 printf("Algoritmo:\n");
-                printf("1. Bubble sort\n2. Insertion sort\n3. Selection sort\n4. Cocktail shaker\n");
+                printf("1. Bubble sort\n2. Insertion sort\n3. Selection sort\n4. Cocktail shaker\n5. Merge sort\n6. Quick sort\n");
                 printf("Algoritmo: ");
                 scanf("%d", &algoritmo);
                 switch(algoritmo){
@@ -48,6 +48,8 @@ int main(){
                     case 2: insertion_sort(p, tamano, campo); break;
                     case 3: selection_sort(p, tamano, campo); break;
                     case 4: cocktail_shaker_sort(p, tamano, campo); break;
+                    case 5: merge(p, tamano, campo); break;
+                    case 6: quick_sort(p, tamano, campo); break;
                     default: printf("Algoritmo invalido\n");
                 }
                 printf("Ordenado correctamente\n");
@@ -126,7 +128,6 @@ int main(){
                 break;
             }
             case 4: {
-                int aux;
                 if(p == NULL){
                     printf("Primero genera los datos (opcion 1)\n");
                     break;
@@ -135,7 +136,7 @@ int main(){
                 printf("Cuantos deportistas mostrar: ");
                 scanf("%d", &n);
                 if(n > tamano) n = tamano;
-                aux = quick_select(p, 0, tamano - 1 , n, 1);
+                quick_select(p, 0, tamano - 1 , n, 1);
                 printf("\n=== TOP %d ===\n", n);
                 for(int i = tamano - 1; i >= tamano - n; i--){
                     printf("%d. %s | Puntaje: %.2f\n",
@@ -177,7 +178,7 @@ int main(){
                 printf("Saliendo...\n");
                 break;
             default:
-                printf("Opcion invalida\n");
+                printf("Algoritmo invalido\n");
                 break;
         }
     } while(opcion != 7);
