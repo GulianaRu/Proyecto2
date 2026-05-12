@@ -30,6 +30,13 @@ double medir_tiempo_busqueda(func_busqueda fn, piloto p[], int tamano, int id){
     return (double)(fin - inicio) / CLOCKS_PER_SEC;
 }
 
+double medir_tiempo_busqueda_binaria_opt(piloto p[], int tamano, int id){
+    clock_t inicio = clock();
+    busqueda_binaria_recursiva(p, id, 0, tamano -1);
+    clock_t fin = clock();
+    return (double)(fin - inicio) / CLOCKS_PER_SEC;
+}
+
 double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo){
     clock_t inicio = clock();
     quick_select(p, izq, der, id, campo);
@@ -40,19 +47,23 @@ double medir_tiempo_qs(piloto p[], int izq, int der, int id, int campo){
 // Funciones wrapper (envoltorios) para que los nuevos algoritmos encajen en el puntero a funcion
 void merge_benchmark(piloto p[], int tamano, int campo){
     // luego Enlazar con las funciones reales de merge luego
-    buble_sort(p, tamano, campo); // temporal para que no explote
+    //buble_sort(p, tamano, campo); // temporal para que no explote
+    merge_recursivo(p, 0, (sizeof(p) - 1) ,campo);
 }
 
 void merge_optimizado_benchmark(piloto p[], int tamano, int campo){
-    buble_sort(p, tamano, campo); // temporal para que no explote
+    //buble_sort(p, tamano, campo); // temporal para que no explote
+    merge_optimizado_recursivo(p, 0, (sizeof(p) - 1), campo, 10);
 }
 
 void quick_ultimo_benchmark(piloto p[], int tamano, int campo){
-    buble_sort(p, tamano, campo); // temporal para que no explote
+    //buble_sort(p, tamano, campo); // temporal para que no explote
+    quick_sort_recursivo(p, 0, tamano - 1, campo, 1);
 }
 
 void quick_mediana_benchmark(piloto p[], int tamano, int campo){
-    buble_sort(p, tamano, campo); // temporal para que no explote
+    //buble_sort(p, tamano, campo); // temporal para que no explote
+    quick_sort_recursivo(p, 0, tamano - 1, campo, 4);
 }
 
 // corre el benchmark completo y guarda resultados en CSV
@@ -82,10 +93,10 @@ void benchmark_sorts(int tamanios[], int n_tamanios){
         double tc = medir_tiempo_sort(cocktail_shaker_sort,         lista, tam, 4);
 
         // ATENCION ROL 3: Conecta aca las firmas verdaderas cuando esten listas
-        double tm = 0.0; // medir_tiempo_sort(merge_benchmark,              lista, tam, 4);
-        double tmo = 0.0; // medir_tiempo_sort(merge_optimizado_benchmark,  lista, tam, 4);
-        double tq1 = 0.0; // medir_tiempo_sort(quick_ultimo_benchmark,      lista, tam, 4);
-        double tq4 = 0.0; // medir_tiempo_sort(quick_mediana_benchmark,     lista, tam, 4);
+        double tm = medir_tiempo_sort(merge_benchmark,              lista, tam, 4);
+        double tmo = medir_tiempo_sort(merge_optimizado_benchmark,  lista, tam, 4);
+        double tq1 = medir_tiempo_sort(quick_ultimo_benchmark,      lista, tam, 4);
+        double tq4 = medir_tiempo_sort(quick_mediana_benchmark,     lista, tam, 4);
 
         printf("%-12d %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f %-12.6f\n",
             tam, tb, ti, ts, tc, tm, tmo, tq1, tq4);
@@ -107,21 +118,21 @@ void benchmark_sorts(int tamanios[], int n_tamanios){
 void benchmark_busquedas(int tamanios[], int n_tamanios){
     int t;
     printf("\n=== BENCHMARK BUSQUEDA ===\n");
-    printf("%-12s %-20s %-20s %-20s\n", "Tamano", "Secuencial(peor)", "Binaria(peor)", "QuickSelect(k)");
+    printf("%-12s %-20s %-20s %-20s %-20s %-20s %-20s\n", "Tamano", "Secuencial", "Binaria", "BinariaOpt", "QuickSelect", "exponencial", "interpolacion");
 
     FILE* f = fopen("docs/benchmark_busquedas.csv", "w");
     if(f != NULL){
-        fprintf(f, "Tamano,Secuencial(peor),Binaria(peor),QuickSelect(k)\n");
+        fprintf(f, "Tamano,Secuencial(peor),Binaria(peor),BinariaOPT,QuickSelect(k),exponencial, interpolacion\n");
     }
 
     for(t=0; t<n_tamanios; t++){
         int tam = tamanios[t];
         piloto* lista = crear_lista(tam);
 
+        buble_sort(lista, tam, 1);
+
         // peor caso secuencial: buscar un id que no existe (-1)
         double ts = medir_tiempo_busqueda(busqueda_secuencial, lista, tam, -1);
-
-        buble_sort(lista, tam, 1);
 
         // qiqck sort peor caso
         double qs = medir_tiempo_qs(lista, 0, tam -1, (tam/2), 1);
@@ -129,10 +140,19 @@ void benchmark_busquedas(int tamanios[], int n_tamanios){
         // peor caso binaria: buscar un id que no existe (-1)
         double tb = medir_tiempo_busqueda(busqueda_binaria_id, lista, tam, -1);
 
-        printf("%-12d %-20.6f %-20.6f %-20.6f\n", tam, ts, tb, qs);
+        // peor caso binariaopt: buscar un id que no existe (-1)
+        double tb2 = medir_tiempo_busqueda_binaria_opt(lista, tam, -1);
+
+        //exponecial peor
+        double exp = medir_tiempo_busqueda(busqueda_exponencial, lista, tam, -1);
+
+        //interpolacion peor
+        double inter = medir_tiempo_busqueda(busqueda_interpolacion, lista, tam, -1);
+
+        printf("%-12d %-20.6f %-20.6f %-20.6f %-20.6f %-20.6f %-20.6f\n", tam, ts, tb, tb2, qs, exp, inter);
 
         if(f != NULL){
-            fprintf(f, "%d,%.6f,%.6f,%.6f\n", tam, ts, tb,qs);
+            fprintf(f, "%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n", tam, ts, tb, tb2, qs, exp, inter);
         }
 
         free(lista);

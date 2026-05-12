@@ -122,3 +122,38 @@ void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado) {
         printf("- %s (Equipo: %s)\n", p[i].Nombre, p[i].Equipo);
     }
 }
+
+// ====================== QUICK SELECT ======================
+// quick select con optimizacion para detectar arreglos ya ordenados
+int partition(piloto p[], int izq, int der, int campo){
+    piloto paux;
+    piloto par = p[der];
+    int i = (izq - 1);
+    int j;
+    for (j = izq; j <= der; j++){
+        if(comparar(p[j], par, campo) < 0){
+            i++;
+            paux = p[j];
+            p[j] = p[i];
+            p[i] = paux;
+        }
+    }
+    paux = p[i+1];
+    p[i+1] = p[der];
+    p[der] = paux;
+    return (i + 1);
+}
+
+int quick_select(piloto p[], int izq, int der, int k, int campo){
+    int pivote = partition(p,izq,der,campo);
+    if(pivote == k - 1){
+        return pivote;
+    }
+    else if(pivote > k - 1){
+        return quick_select(p,izq,pivote-1,k,campo);
+    }
+    else{
+        return quick_select(p,pivote+1,der,k,campo);
+    }
+    return -1;
+}

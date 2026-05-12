@@ -18,7 +18,7 @@ CFLAGS=-Wall -Wextra -Wpedantic -O3
 LDFLAGS= -Wall -lm
 
 all: $(OBJDB_FILES) $(OBJ_FILES)
-	$(CC) $(CFLAGS) -o build/$(EXEC) $(OBJ_FILES) $(INCLUDE) $(LIBS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o build/$(EXEC) $(OBJ_FILES) $(OBJDB_FILES) $(INCLUDE) $(LIBS) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $^ $(INCLUDE)

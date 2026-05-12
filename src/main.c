@@ -37,22 +37,14 @@ int main(){
                     printf("Primero genera los datos (opcion 1)\n");
                     break;
                 }
-                int campo, algoritmo;
-                printf("Ordenar por:\n");
-                printf("1. ID\n2. Nombre\n3. Equipo\n4. Puntaje\n5. Competencias\n");
-                printf("Campo: ");
-                scanf("%d", &campo);
+                int algoritmo;
                 printf("Algoritmo:\n");
-                printf("1. Bubble sort\n2. Insertion sort\n3. Selection sort\n4. Cocktail shaker\n5. Merge sort\n6. Quick sort\n");
+                printf("5. Merge sort\n6. Quick sort\n");
                 printf("Algoritmo: ");
                 scanf("%d", &algoritmo);
                 switch(algoritmo){
-                    case 1: buble_sort(p, tamano, campo); break;
-                    case 2: insertion_sort(p, tamano, campo); break;
-                    case 3: selection_sort(p, tamano, campo); break;
-                    case 4: cocktail_shaker_sort(p, tamano, campo); break;
-                    case 5: merge(p, tamano, campo); break;
-                    case 6: quick_sort(p, tamano, campo); break;
+                    case 5: merge(p, tamano, 4); break;
+                    case 6: quick_sort(p, tamano, 4); break;
                     default: printf("Algoritmo invalido\n");
                 }
                 printf("Ordenado correctamente\n");
@@ -144,7 +136,7 @@ int main(){
                 printf("Cuantos deportistas mostrar: ");
                 scanf("%d", &n);
                 if(n > tamano) n = tamano;
-                quick_select(p, 0, tamano - 1 , n, 1);
+                merge_optimizado_recursivo(p, 0, tamano - 1, 4, 10);
                 printf("\n=== TOP %d ===\n", n);
                 for(int i = tamano - 1; i >= tamano - n; i--){
                     printf("%d. %s | Puntaje: %.2f\n",
