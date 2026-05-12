@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../incs/p.h"
+#include "../incs/piloto.h"
 
 int main(){
     srand(time(NULL));
@@ -17,8 +17,11 @@ int main(){
         printf("6. quick select\n");
         printf("7. Salir\n");
         printf("Opcion: ");
-        scanf("%d", &opcion);
-
+        // Verificamos si scanf no pudo leer 1 numero
+        if (scanf("%d", &opcion) != 1) {
+            while (getchar() != '\n'); // Limpia la letra trabada
+            opcion = -1; // Forzamos una opcion invalida para que el switch no haga nada raro
+        }
         switch(opcion){
             case 1: {
                 printf("Cuantos deportistas generar: ");
@@ -75,7 +78,12 @@ int main(){
                 if (tipo_busqueda >= 1 && tipo_busqueda <= 4) {
                     int id;
                     printf("Ingrese el ID a buscar: ");
-                    scanf("%d", &id);
+                    if (scanf("%d", &id) != 1) {
+                        while (getchar() != '\n');
+                        id = -1; // o algun manejo de error
+                        printf("Entrada invalida. Debe ser un numero.\n");
+                        continue; // Salta al inicio del menu
+                    }
                     
                     int resultado = -1;
 
