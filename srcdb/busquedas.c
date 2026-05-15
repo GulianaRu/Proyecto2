@@ -120,20 +120,27 @@ int buscar_ultima_ocurrencia(piloto p[], int tamano, float puntaje_buscado) {
     return resultado;
 }
 
-void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado) {
-    int primera_pos = buscar_primera_ocurrencia(p, tamano, puntaje_buscado);
+void busqueda_rango_puntaje(piloto p[], int tamano, float minimo, float maximo){ 
+    int encontrados = 0;
+    printf("-> [Info] Mostrando deportistas con puntaje entre %.2f y %.2f:\n", minimo, maximo);
 
-    if (primera_pos == -1) {
-        printf("No se encontro a nadie con %.2f puntos.\n", puntaje_buscado);
-        return;
+    for(int i = 0; i < tamano; i++){
+        if(p[i].Puntaje > maximo){
+            break;
+        }
+
+        if(p[i].Puntaje >= minimo && p[i].Puntaje <= maximo){
+            printf("ID: %d | Nombre: %s | Equipo: %s | Puntaje: %.2f | Competencias: %d\n",
+                   p[i].Id, p[i].Nombre, p[i].Equipo, p[i].Puntaje, p[i].Competencias);
+            encontrados++;
+        }
     }
 
-    int ultima_pos = buscar_ultima_ocurrencia(p, tamano, puntaje_buscado);
-
-    printf("El puntaje %.2f aparece desde la posicion %d hasta la %d.\n", puntaje_buscado, primera_pos, ultima_pos);
-    
-    for(int i = primera_pos; i <= ultima_pos; i++){
-        printf("- %s (Equipo: %s)\n", p[i].Nombre, p[i].Equipo);
+    if(encontrados == 0){
+        printf("No se encontraron deportistas dentro de ese rango.\n");
+    }
+    else{
+        printf("\nTotal encontrados: %d\n", encontrados);
     }
 }
 

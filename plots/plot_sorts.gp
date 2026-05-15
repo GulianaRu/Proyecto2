@@ -168,3 +168,37 @@ plot "docs/sorts_peor.csv" skip 1 using 1:9 title "Peor Caso" lw 2 lc rgb "red"
 set output "plots/quicksort/quick_sort_mediana_promedio.png"
 set title "Quick Sort (Mediana de 3) - Caso Promedio"
 plot "docs/sorts_promedio.csv" skip 1 using 1:9 title "Caso Promedio" lw 2 lc rgb "blue"
+
+# ==============================================================================
+# 9. COMPARACION DE PIVOTES QUICK SORT
+# ==============================================================================
+set output "plots/quicksort/quick_sort_pivotes_comparativo.png"
+set title "Quick Sort - Comparacion de Pivotes"
+set xlabel "Tamano del arreglo (n)"
+set ylabel "Tiempo (segundos)"
+set grid
+set key top left
+set style data linespoints
+
+plot "docs/sorts_promedio.csv" skip 1 using 1:8 title "QuickUlt - Promedio" lw 2, \
+     "docs/sorts_promedio.csv" skip 1 using 1:9 title "QuickMed - Promedio" lw 2, \
+     "docs/sorts_mejor.csv" skip 1 using 1:8 title "QuickUlt - Mejor" lw 2, \
+     "docs/sorts_mejor.csv" skip 1 using 1:9 title "QuickMed - Mejor" lw 2, \
+     "docs/sorts_peor.csv" skip 1 using 1:8 title "QuickUlt - Peor" lw 2, \
+     "docs/sorts_peor.csv" skip 1 using 1:9 title "QuickMed - Peor" lw 2
+
+# ==============================================================================
+# 10. COMPARACION MERGE VS QUICK - CASO PROMEDIO
+# ==============================================================================
+set output "plots/comparatives/comp_merge_quick.png"
+set title "Comparacion de Merge Sort y Quick Sort - Caso Promedio"
+set xlabel "Tamano del arreglo (n)"
+set ylabel "Tiempo (segundos)"
+set grid
+set key top left
+set style data linespoints
+
+plot "docs/sorts_promedio.csv" skip 1 using 1:6 title "Merge Sort" lw 2, \
+     "docs/sorts_promedio.csv" skip 1 using 1:7 title "Merge Sort Optimizado" lw 2, \
+     "docs/sorts_promedio.csv" skip 1 using 1:8 title "Quick Sort Ultimo Pivote" lw 2, \
+     "docs/sorts_promedio.csv" skip 1 using 1:9 title "Quick Sort Mediana de Tres" lw 2

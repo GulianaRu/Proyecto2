@@ -21,16 +21,32 @@ void invertir_arreglo(piloto p[], int tamano) {
     }
 }
 
+int esta_ordenado(piloto p[], int tamano, int campo){
+    for(int i = 0; i < tamano - 1; i++){
+        if(comparar(p[i], p[i + 1], campo) > 0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
 // ====================== MEDICION DE TIEMPOS ======================
 
 typedef void (*func_sort)(piloto[], int, int);
 
-double medir_tiempo_sort(func_sort fn, piloto p[], int tamano, int campo){
+double medir_tiempo_sort(func_sort fn, piloto p[], int tamano, int campo, int *ok){
     double tiempo_acumulado = 0.0;
     int repeticiones = 0;
+    *ok = 1;
     
     do {
         piloto* copia = (piloto*)malloc(tamano * sizeof(piloto));
+        
+        if (copia == NULL){
+            *ok = 0;
+            return -1.0;
+        }
+
         memcpy(copia, p, tamano * sizeof(piloto));
 
         
@@ -38,12 +54,16 @@ double medir_tiempo_sort(func_sort fn, piloto p[], int tamano, int campo){
         fn(copia, tamano, campo);
         clock_t fin = clock();
 
+        if (!esta_ordenado(copia, tamano, campo)){
+            *ok = 0;
+        }
+        
         tiempo_acumulado += (double)(fin - inicio) / CLOCKS_PER_SEC;
         
         free(copia); 
         repeticiones++;
         
-    } while (tiempo_acumulado < 0.05 && repeticiones < 10);
+    } while (tiempo_acumulado < 0.5 && repeticiones < 50);
 
     return tiempo_acumulado / (double)repeticiones;
 }
@@ -129,19 +149,25 @@ void ejecutar_test_sorts(const char* nombre_archivo, int tamanios[], int n_taman
             fisher_yates(lista, tam);
         }
 
-        double tb = medir_tiempo_sort(buble_sort, lista, tam, 4);
-        double ti = medir_tiempo_sort(insertion_sort, lista, tam, 4);
-        double ts = medir_tiempo_sort(selection_sort, lista, tam, 4);
-        double tc = medir_tiempo_sort(cocktail_shaker_sort, lista, tam, 4);
-        double tm = medir_tiempo_sort(merge_benchmark, lista, tam, 4);
-        double tmo = medir_tiempo_sort(merge_optimizado_benchmark, lista, tam, 4);
-        double tq1 = medir_tiempo_sort(quick_ultimo_benchmark, lista, tam, 4);
-        double tq4 = medir_tiempo_sort(quick_mediana_benchmark, lista, tam, 4);
+        int ok_bubble, ok_insertion, ok_selection, ok_cocktail;
+        int ok_merge, ok_mergeopt, ok_qult, ok_qmed;
+        
+        double tb = medir_tiempo_sort(buble_sort, lista, tam, 4, &ok_bubble);
+        double ti = medir_tiempo_sort(insertion_sort, lista, tam, 4, &ok_insertion);
+        double ts = medir_tiempo_sort(selection_sort, lista, tam, 4, &ok_selection);
+        double tc = medir_tiempo_sort(cocktail_shaker_sort, lista, tam, 4, &ok_cocktail);
+        double tm = medir_tiempo_sort(merge_benchmark, lista, tam, 4, &ok_merge);
+        double tmo = medir_tiempo_sort(merge_optimizado_benchmark, lista, tam, 4, &ok_mergeopt);
+        double tq1 = medir_tiempo_sort(quick_ultimo_benchmark, lista, tam, 4, &ok_qult);
+        double tq4 = medir_tiempo_sort(quick_mediana_benchmark, lista, tam, 4, &ok_qmed);
 
+        int ok_general = ok_bubble && ok_insertion && ok_selection && ok_cocktail &&
+                         ok_merge && ok_mergeopt && ok_qult && ok_qmed;
+    
         fprintf(f, "%d,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f\n", 
                 tam, tb, ti, ts, tc, tm, tmo, tq1, tq4);
         
-        printf("%-10d %-10.4f %-10.4f %-10.4f [OK]\n", tam, tb, tm, tq4);
+        printf("%-10d %-10.8f %-10.8f %-10.8f [%s]\n", tam, tb, tm, tq4, ok_general ? "OK" : "ERROR");
         free(lista);
     }
     fclose(f);

@@ -25,6 +25,7 @@ piloto* crear_lista(int tamano);
 void fisher_yates(piloto p[], int tamano);
 void guardar_en_csv(piloto lista[], int tamano, const char* nombre_archivo);
 piloto* leer_csv(const char* nombre_archivo, int tamano_esperado);
+int esta_ordenado(piloto p[], int tamano, int campo);
 
 // Ordenamientos
 void buble_sort(piloto p[], int tamano, int campo);
@@ -44,7 +45,7 @@ int busqueda_binaria_id(piloto p[], int tamano, int id_buscado);
 int busqueda_binaria_recursiva(piloto p[], int id_buscado, int bajo, int alto);
 int busqueda_interpolacion(piloto p[], int tamano, int id_buscado);
 int busqueda_exponencial(piloto p[], int tamano, int id_buscado);
-void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado);
+void busqueda_rango_puntaje(piloto p[], int tamano, float minimo, float maximo);
 
 // Benchmarks
 void benchmark_sorts(int tamanios[], int n_tamanios);

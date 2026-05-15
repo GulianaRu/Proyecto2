@@ -153,15 +153,23 @@ int main(){
                 } 
                 // La opcion 6 (Rangos) busca por Puntaje
                 else if (tipo_busqueda == 6) {
-                    float puntaje;
-                    printf("Ingrese el Puntaje a buscar (ej. 85.50): ");
-                    scanf("%f", &puntaje);
+                    float minimo, maximo;
+
+                    printf("Ingrese el puntaje minimo a buscar: ");
+                    scanf("%f", &minimo);
+                    printf("Ingrese el puntaje maximo a buscar: ");
+                    scanf("%f", &maximo);
                     
-                    // La busqueda de rangos requiere obligatoriamente que este ordenado por PUNTAJE
-                    printf("-> [Info] Ordenando datos por PUNTAJE con Quick Sort antes de buscar rangos...\n");
-                    quick_sort_recursivo(p, 0, tamano - 1, 4, 4); // Ordena por Campo 4 (Puntaje)
-                    
-                    busqueda_rango_puntaje(p, tamano, puntaje);
+                    if(minimo > maximo){
+                        float aux = minimo;
+                        minimo = maximo;
+                        maximo = aux;
+                    }
+
+                    // datos ordenados por puntaje para mostrar los resultados en orden
+                    printf("-> [Info] Ordenando datos por PUNTAJE con Merge Sort optimizado antes de buscar rangos...\n");
+                    merge_optimizado_recursivo(p, 0, tamano - 1, 4, 15);
+                    busqueda_rango_puntaje(p, tamano, minimo, maximo);
                 }
                 else {
                     printf("Opcion de busqueda invalida.\n");
@@ -207,7 +215,7 @@ int main(){
                     break;
                 }
                 int k, aux;
-                printf("Buscar el k-esimo deportista por ID (ej. el 5to con menor ID)\n");
+                printf("Buscar el k-esimo deportista por puntaje\n");
                 printf("Ingresa k: ");
                 scanf("%d", &k);
                 
@@ -216,10 +224,10 @@ int main(){
                     break;
                 }
                 
-                aux = quick_select(p, 0, tamano - 1 , k, 1);
+                aux = quick_select(p, 0, tamano - 1, tamano - k + 1, 4);
                 
                 if (aux != -1) {
-                    printf("El %d-esimo deportista por ID es:\n", k);
+                    printf("El %d-esimo deportista por puntaje es:\n", k);
                     printf("ID: %d | Nombre: %s | Equipo: %s | Puntaje: %.2f | Competencias: %d (En indice %d)\n",
                             p[aux].Id, p[aux].Nombre, p[aux].Equipo, p[aux].Puntaje, p[aux].Competencias, aux);
                 }
