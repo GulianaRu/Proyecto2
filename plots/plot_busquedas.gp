@@ -1,52 +1,41 @@
-# grafico comparativo de algoritmos de busqueda
-# lee desde docs/benchmark_busquedas.csv y guarda en plots/
-
 set datafile separator ","
 set terminal pngcairo size 900,600 enhanced font "Arial,12"
-set output "plots/comparatives/busquedas_comparativo.png"
-
-set title "Comparacion de algoritmos de busqueda (peor caso)"
-set xlabel "Tamano del arreglo (n)"
-set ylabel "Tiempo (segundos)"
 set grid
 set key top left
 set style data linespoints
 
-set key autotitle columnheader
+set output "plots/comparatives/busquedas_comparativo.png"
+set title "Comparacion General de Busquedas"
+set xlabel "Tamano del arreglo (n)"
+set ylabel "Tiempo (segundos)"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:2 title "Secuencial" lw 2 lc rgb "red", \
+     "docs/benchmark_busquedas.csv" skip 1 using 1:3 title "Binaria Iter" lw 2 lc rgb "blue", \
+     "docs/benchmark_busquedas.csv" skip 1 using 1:4 title "Binaria Rec" lw 2 lc rgb "green", \
+     "docs/benchmark_busquedas.csv" skip 1 using 1:5 title "QuickSelect" lw 2 lc rgb "purple", \
+     "docs/benchmark_busquedas.csv" skip 1 using 1:6 title "Exponencial" lw 2 lc rgb "brown", \
+     "docs/benchmark_busquedas.csv" skip 1 using 1:7 title "Interpolacion" lw 2 lc rgb "orange"
 
-plot "docs/benchmark_busquedas.csv" using 1:2 title "Busqueda Secuencial" lw 2 lc rgb "red", \
-     "docs/benchmark_busquedas.csv" using 1:3 title "Busqueda Binaria" lw 2 lc rgb "blue", \
-     "docs/benchmark_busquedas.csv" using 1:4 title "Busqueda Binaria Optimisada" lw 2 lc rgb "green", \
-     "docs/benchmark_busquedas.csv" using 1:5 title "QuickSelect(k)" lw 2 lc rgb "purple", \
-     "docs/benchmark_busquedas.csv" using 1:6 title "Busqueda Exponencial" lw 2 lc rgb "brown", \
-     "docs/benchmark_busquedas.csv" using 1:7 title "Busqueda interpolacion" lw 2 lc rgb "yellow", \
+# Individuales
+set output "plots/sequentialsearch/busqueda_secuencial_peor.png"
+set title "Busqueda Secuencial - Peor Caso O(N)"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:2 title "Secuencial" lw 2 lc rgb "red"
 
-# grafico individual busqueda secuencial
-set output "plots/sequentialsearch/busqueda_secuencial.png"
-set title "Busqueda Secuencial - tiempo de ejecucion"
-plot "docs/benchmark_busquedas.csv" using 1:2 title "Secuencial" lw 2 lc rgb "red"
+set output "plots/binarysearch/busqueda_binaria_iterativa.png"
+set title "Busqueda Binaria Iterativa - Peor Caso O(log N)"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:3 title "Binaria Iterativa" lw 2 lc rgb "blue"
 
-# grafico individual busqueda binaria
-set output "plots/binarysearch/busqueda_binaria.png"
-set title "Busqueda Binaria - tiempo de ejecucion"
-plot "docs/benchmark_busquedas.csv" using 1:3 title "Binaria" lw 2 lc rgb "blue"
+set output "plots/binarysearch/busqueda_binaria_recursiva.png"
+set title "Busqueda Binaria Recursiva - Peor Caso O(log N)"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:4 title "Binaria Recursiva" lw 2 lc rgb "green"
 
-# grafico individual Busqueda Binaria Optimisada
-set output "plots/binarysearch/binaria_optimisada.png"
-set title "Busqueda Binaria Optimisada - tiempo de ejecucion"
-plot "docs/benchmark_busquedas.csv" using 1:4 title "Busqueda Binaria Optimisada" lw 2 lc rgb "green"
+set output "plots/quickselect/quickselect_analisis.png"
+set title "QuickSelect(k) - Analisis de Rendimiento"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:5 title "QuickSelect" lw 2 lc rgb "purple"
 
-# grafico individual QuickSelect(k)
-set output "plots/quickselect/quickselect.png"
-set title "QuickSelect(k) - tiempo de ejecucion"
-plot "docs/benchmark_busquedas.csv" using 1:5 title "QuickSelect" lw 2 lc rgb "purple"
+set output "plots/exponencial/busqueda_exponencial_analisis.png"
+set title "Busqueda Exponencial - Analisis de Rendimiento"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:6 title "Exponencial" lw 2 lc rgb "brown"
 
-# grafico individual Busqueda Exponencial
-set output "plots/exponencial/busqueda_exponencial.png"
-set title "Busqueda Exponencial - tiempo de ejecucion"
-plot "docs/benchmark_busquedas.csv" using 1:6 title "Exponencial" lw 2 lc rgb "brown"
-
-# grafico individual Busqueda interpolacion
-set output "plots/interpolacion/busqueda_interpolacion.png"
-set title "Busqueda interpolacion - tiempo de ejecucion"
-plot "docs/benchmark_busquedas.csv" using 1:7 title "interpolacion" lw 2 lc rgb "yellow"
+set output "plots/interpolacion/busqueda_interpolacion_analisis.png"
+set title "Busqueda Interpolacion - Analisis de Rendimiento"
+plot "docs/benchmark_busquedas.csv" skip 1 using 1:7 title "Interpolacion" lw 2 lc rgb "orange"

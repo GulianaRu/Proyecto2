@@ -1,4 +1,5 @@
 #include "../incs/piloto.h"
+#include <math.h>
 
 // ====================== ALGORITMOS DE BUSQUEDA ======================
 
@@ -81,50 +82,62 @@ int busqueda_exponencial(piloto p[], int tamano, int id_buscado) {
     return busqueda_binaria_recursiva(p, id_buscado, i / 2, fmin(i, tamano - 1));
 }
 
-void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado) {
-    int bajo = 0, alto = tamano - 1;
-    int encontrado = -1;
+// ====================== BUSQUEDA DE RANGOS (OPTIMIZADA O(log N)) ======================
 
-    // busqueda binaria normal
+int buscar_primera_ocurrencia(piloto p[], int tamano, float puntaje_buscado) {
+    int bajo = 0, alto = tamano - 1;
+    int resultado = -1;
+
     while (bajo <= alto) {
         int mid = bajo + (alto - bajo) / 2;
         if (p[mid].Puntaje == puntaje_buscado) {
-            encontrado = mid;
-            break;
+            resultado = mid; 
+            alto = mid - 1; // seguimos buscando hacia la izquierda
         } else if (p[mid].Puntaje < puntaje_buscado) {
             bajo = mid + 1;
         } else {
             alto = mid - 1;
         }
     }
+    return resultado;
+}
 
-    if (encontrado == -1) {
+int buscar_ultima_ocurrencia(piloto p[], int tamano, float puntaje_buscado) {
+    int bajo = 0, alto = tamano - 1;
+    int resultado = -1;
+
+    while (bajo <= alto) {
+        int mid = bajo + (alto - bajo) / 2;
+        if (p[mid].Puntaje == puntaje_buscado) {
+            resultado = mid; 
+            bajo = mid + 1; // seguimos buscando hacia la derecha
+        } else if (p[mid].Puntaje < puntaje_buscado) {
+            bajo = mid + 1;
+        } else {
+            alto = mid - 1;
+        }
+    }
+    return resultado;
+}
+
+void busqueda_rango_puntaje(piloto p[], int tamano, float puntaje_buscado) {
+    int primera_pos = buscar_primera_ocurrencia(p, tamano, puntaje_buscado);
+
+    if (primera_pos == -1) {
         printf("No se encontro a nadie con %.2f puntos.\n", puntaje_buscado);
         return;
     }
 
-    // luego se expande hacia la izquierda para buscar el inicio del rango
-    int primera_pos = encontrado;
-    while (primera_pos > 0 && p[primera_pos - 1].Puntaje == puntaje_buscado) {
-        primera_pos--;
-    }
-
-    // se expande hacia la derecha para buscar el final del rango
-    int ultima_pos = encontrado;
-    while (ultima_pos < tamano - 1 && p[ultima_pos + 1].Puntaje == puntaje_buscado) {
-        ultima_pos++;
-    }
+    int ultima_pos = buscar_ultima_ocurrencia(p, tamano, puntaje_buscado);
 
     printf("El puntaje %.2f aparece desde la posicion %d hasta la %d.\n", puntaje_buscado, primera_pos, ultima_pos);
     
-    // imprimir los deportistas en ese rango
     for(int i = primera_pos; i <= ultima_pos; i++){
         printf("- %s (Equipo: %s)\n", p[i].Nombre, p[i].Equipo);
     }
 }
 
 // ====================== QUICK SELECT ======================
-// quick select con optimizacion para detectar arreglos ya ordenados
 int partition(piloto p[], int izq, int der, int campo){
     piloto paux;
     piloto par = p[der];

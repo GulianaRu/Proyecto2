@@ -55,4 +55,9 @@ void merge_optimizado_benchmark(piloto p[], int tamano, int campo);
 void quick_ultimo_benchmark(piloto p[], int tamano, int campo);
 void quick_mediana_benchmark(piloto p[], int tamano, int campo);
 
+// Funciones recursivas internas
+void merge_recursivo(piloto p[], int izq, int der, int campo);
+void merge_optimizado_recursivo(piloto p[], int izq, int der, int campo, int umbral);
+void quick_sort_recursivo(piloto p[], int izq, int der, int campo, int tipo_pivote);
+
 #endif

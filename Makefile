@@ -36,6 +36,7 @@ clean:
 folders:
 	mkdir -p src srcdb obj incs build docs db
 	mkdir -p plots/binarysearch plots/bubblesort plots/comparatives plots/insertionsort plots/sequentialsearch plots/selectionsort
+	mkdir -p plots/cocktail_shaker_sort plots/exponencial plots/interpolacion plots/quickselect plots/mergesort plots/quicksort
 
 send:
 	tar czf $(GRUPO)-$(NTAR).tgz --transform 's,^,$(GRUPO)-$(NTAR)/,' Makefile src srcdb incs docs

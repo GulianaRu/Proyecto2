@@ -10,18 +10,20 @@ int main(){
     do {
         printf("\n===== MENU =====\n");
         printf("1. Generar datos\n");
-        printf("2. Ordenar\n");
+        printf("2. Ordenar (con justificacion de algoritmos)\n");
         printf("3. Busquedas\n");
-        printf("4. Ranking top N\n");
+        printf("4. Ranking top N (aislado con Quick Select)\n");
         printf("5. Benchmark algoritmos\n");
-        printf("6. quick select\n");
+        printf("6. Quick select (busqueda k-esimo)\n");
         printf("7. Salir\n");
+        printf("8. Estructura de un deportista\n");
         printf("Opcion: ");
-        // Verificamos si scanf no pudo leer 1 numero
+        
         if (scanf("%d", &opcion) != 1) {
-            while (getchar() != '\n'); // Limpia la letra trabada
-            opcion = -1; // Forzamos una opcion invalida para que el switch no haga nada raro
+            while (getchar() != '\n'); 
+            opcion = -1; 
         }
+        
         switch(opcion){
             case 1: {
                 printf("Cuantos deportistas generar: ");
@@ -37,17 +39,63 @@ int main(){
                     printf("Primero genera los datos (opcion 1)\n");
                     break;
                 }
-                int algoritmo;
-                printf("Algoritmo:\n");
-                printf("5. Merge sort\n6. Quick sort\n");
-                printf("Algoritmo: ");
-                scanf("%d", &algoritmo);
-                switch(algoritmo){
-                    case 5: merge(p, tamano, 4); break;
-                    case 6: quick_sort(p, tamano, 4); break;
-                    default: printf("Algoritmo invalido\n");
+                int algoritmo, campo;
+                printf("\n--- MENU DE ORDENAMIENTO ---\n");
+                printf("Seleccione el campo a ordenar:\n");
+                printf("1. ID\n2. Nombre\n3. Equipo\n4. Puntaje\n5. Competencias\n");
+                printf("Opcion: ");
+                scanf("%d", &campo);
+                
+                if(campo < 1 || campo > 5) {
+                    printf("Campo invalido, ordenando por Puntaje por defecto.\n");
+                    campo = 4; 
                 }
-                printf("Ordenado correctamente\n");
+
+                printf("\nSeleccione el Algoritmo:\n");
+                printf("  -- Algoritmos Tarea 1 --\n");
+                printf("1. Bubble Sort\n");
+                printf("2. Insertion Sort\n");
+                printf("3. Selection Sort\n");
+                printf("4. Cocktail Shaker Sort\n");
+                printf("  -- Algoritmos Tarea 2 --\n");
+                printf("5. Merge sort (Estable, O(N log N))\n");
+                printf("6. Quick sort (Eficiente en memoria in-place)\n");
+                printf("Opcion: ");
+                scanf("%d", &algoritmo);
+                
+                switch(algoritmo){
+                    case 1: 
+                        printf("-> Ordenando con Bubble Sort...\n");
+                        buble_sort(p, tamano, campo); 
+                        break;
+                    case 2: 
+                        printf("-> Ordenando con Insertion Sort...\n");
+                        insertion_sort(p, tamano, campo); 
+                        break;
+                    case 3: 
+                        printf("-> Ordenando con Selection Sort...\n");
+                        selection_sort(p, tamano, campo); 
+                        break;
+                    case 4: 
+                        printf("-> Ordenando con Cocktail Shaker Sort...\n");
+                        cocktail_shaker_sort(p, tamano, campo); 
+                        break;
+                    case 5: 
+                        printf("-> Ordenando con Merge Sort...\n");
+                        merge(p, tamano, campo); 
+                        break;
+                    case 6: 
+                        printf("-> Ordenando con Quick Sort...\n");
+                        quick_sort(p, tamano, campo); 
+                        break;
+                    default: 
+                        printf("Algoritmo invalido\n");
+                        continue; // Salta al menu sin guardar si eligio mal
+                }
+                printf("Ordenado correctamente en la memoria.\n");
+                
+                guardar_en_csv(p, tamano, "db/ordenado.csv");
+                printf("-> ¡Listo! Abre el archivo 'db/ordenado.csv' para verificar que se ordeno bien.\n");
                 break;
             }
             case 3: {
@@ -58,51 +106,41 @@ int main(){
                 
                 int tipo_busqueda;
                 printf("\n--- MENU DE BUSQUEDAS ---\n");
-                printf("1. Busqueda Secuencial (Iterativa Tarea 1)\n");
-                printf("2. Busqueda Binaria Recursiva\n");
-                printf("3. Busqueda por Interpolacion\n");
-                printf("4. Busqueda Exponencial\n");
-                printf("5. Busqueda de Rangos (Por Puntaje)\n");
+                printf("  -- Algoritmos Tarea 1 --\n");
+                printf("1. Busqueda Secuencial\n");
+                printf("2. Busqueda Binaria Iterativa\n");
+                printf("  -- Algoritmos Tarea 2 --\n");
+                printf("3. Busqueda Binaria Recursiva\n");
+                printf("4. Busqueda por Interpolacion\n");
+                printf("5. Busqueda Exponencial\n");
+                printf("6. Busqueda de Rangos (Por Puntaje)\n");
                 printf("Opcion: ");
                 scanf("%d", &tipo_busqueda);
 
-                // si no es secuencial ni rangos, asumimos que busca por ID y necesita estar ordenado
-                if (tipo_busqueda >= 1 && tipo_busqueda <= 4) {
+                // Opciones del 1 al 5 buscan por ID
+                if (tipo_busqueda >= 1 && tipo_busqueda <= 5) {
                     int id;
                     printf("Ingrese el ID a buscar: ");
                     if (scanf("%d", &id) != 1) {
                         while (getchar() != '\n');
-                        id = -1; // o algun manejo de error
                         printf("Entrada invalida. Debe ser un numero.\n");
-                        continue; // Salta al inicio del menu
+                        continue; 
                     }
                     
                     int resultado = -1;
 
-                    // la busqueda secuencial no necesita orden, pero las otras si.
-                    // para evitar errores, ordenamos por ID siempre que no sea secuencial.
-                    if (tipo_busqueda != 1) {
-                         // ordenamos por id antes de buscar binariamente
-                         buble_sort(p, tamano, 1);
+                    // AQUI ESTA LA PROTECCION: Si no es la secuencial, debe estar ordenado
+                    if (tipo_busqueda != 1) { 
+                         printf("-> [Info] Ordenando datos por ID con Quick Sort antes de buscar...\n");
+                         quick_sort_recursivo(p, 0, tamano - 1, 1, 4); // Ordena por Campo 1 (ID)
                     }
 
                     switch(tipo_busqueda) {
-                        case 1:
-                            // La secuencial
-                            resultado = busqueda_secuencial(p, tamano, id);
-                            break;
-                        case 2:
-                            // La nueva recursiva
-                            resultado = busqueda_binaria_recursiva(p, id, 0, tamano - 1);
-                            break;
-                        case 3:
-                            // Interpolacion
-                            resultado = busqueda_interpolacion(p, tamano, id);
-                            break;
-                        case 4:
-                            // Exponencial
-                            resultado = busqueda_exponencial(p, tamano, id);
-                            break;
+                        case 1: resultado = busqueda_secuencial(p, tamano, id); break;
+                        case 2: resultado = busqueda_binaria_id(p, tamano, id); break; // Tarea 1
+                        case 3: resultado = busqueda_binaria_recursiva(p, id, 0, tamano - 1); break; // Tarea 2
+                        case 4: resultado = busqueda_interpolacion(p, tamano, id); break;
+                        case 5: resultado = busqueda_exponencial(p, tamano, id); break;
                     }
 
                     if(resultado == -1){
@@ -113,13 +151,16 @@ int main(){
                             p[resultado].Id, p[resultado].Nombre, p[resultado].Equipo, p[resultado].Puntaje, p[resultado].Competencias);
                     }
                 } 
-                else if (tipo_busqueda == 5) {
+                // La opcion 6 (Rangos) busca por Puntaje
+                else if (tipo_busqueda == 6) {
                     float puntaje;
                     printf("Ingrese el Puntaje a buscar (ej. 85.50): ");
                     scanf("%f", &puntaje);
                     
-                    // ordenamos por puntaje
-                    buble_sort(p, tamano, 4); 
+                    // La busqueda de rangos requiere obligatoriamente que este ordenado por PUNTAJE
+                    printf("-> [Info] Ordenando datos por PUNTAJE con Quick Sort antes de buscar rangos...\n");
+                    quick_sort_recursivo(p, 0, tamano - 1, 4, 4); // Ordena por Campo 4 (Puntaje)
+                    
                     busqueda_rango_puntaje(p, tamano, puntaje);
                 }
                 else {
@@ -133,11 +174,19 @@ int main(){
                     break;
                 }
                 int n;
-                printf("Cuantos deportistas mostrar: ");
+                printf("Cuantos deportistas mostrar en el Top: ");
                 scanf("%d", &n);
                 if(n > tamano) n = tamano;
-                merge_optimizado_recursivo(p, 0, tamano - 1, 4, 10);
-                printf("\n=== TOP %d ===\n", n);
+                
+                // Usamos quick select para mover los Top N al final de la lista sin ordenar lo demas (O(N))
+                int indice_corte = tamano - n;
+                quick_select(p, 0, tamano - 1, indice_corte + 1, 4); 
+                
+                // Luego ordenamos unicamente a esos N mejores para listarlos bonito (O(N log N) pero solo para los mejores)
+                merge_optimizado_recursivo(p, indice_corte, tamano - 1, 4, 15);
+                
+                printf("\n=== TOP %d MEJORES DEPORTISTAS ===\n", n);
+                printf("(Generado optimizadamente usando Quick Select para aislamiento)\n");
                 for(int i = tamano - 1; i >= tamano - n; i--){
                     printf("%d. %s | Puntaje: %.2f\n",
                         tamano - i, p[i].Nombre, p[i].Puntaje);
@@ -145,9 +194,9 @@ int main(){
                 break;
             }
             case 5: {
-                // tamanios de prueba para el benchmark
-                int tamanios[] = {1000, 5000, 10000, 50000, 100000};
-                int n_tamanios = 5;
+                int tamanios[] = {1000, 5000, 10000, 50000}; 
+                int n_tamanios = 4; 
+                
                 benchmark_sorts(tamanios, n_tamanios);
                 benchmark_busquedas(tamanios, n_tamanios);
                 break;
@@ -157,28 +206,35 @@ int main(){
                     printf("Primero genera los datos (opcion 1)\n");
                     break;
                 }
-                int espacio, aux;
-                printf("buscar por id\n");
-                printf("espacio: ");
-                scanf("%d", &espacio);
-                printf("Algoritmo:quick select\n");
-                aux = quick_select(p, 0, tamano - 1 , espacio, 1);
+                int k, aux;
+                printf("Buscar el k-esimo deportista por ID (ej. el 5to con menor ID)\n");
+                printf("Ingresa k: ");
+                scanf("%d", &k);
                 
-                printf("ID: %d | Nombre: %s | Equipo: %s | Puntaje: %.2f | Competencias: %d | en el espacio %d \n",
-                        p[aux].Id,
-                        p[aux].Nombre,
-                        p[aux].Equipo,
-                        p[aux].Puntaje,
-                        p[aux].Competencias,
-                        aux
-                    );
+                if (k < 1 || k > tamano) {
+                    printf("k debe estar entre 1 y %d\n", tamano);
+                    break;
+                }
+                
+                aux = quick_select(p, 0, tamano - 1 , k, 1);
+                
+                if (aux != -1) {
+                    printf("El %d-esimo deportista por ID es:\n", k);
+                    printf("ID: %d | Nombre: %s | Equipo: %s | Puntaje: %.2f | Competencias: %d (En indice %d)\n",
+                            p[aux].Id, p[aux].Nombre, p[aux].Equipo, p[aux].Puntaje, p[aux].Competencias, aux);
+                }
                 break;
             }
             case 7:
                 printf("Saliendo...\n");
                 break;
+            case 8:
+                printf("Estructura de un deportista (Ejemplo)\n");
+                printf("Id,Nombre,Equipo,Puntaje,Competencias\n");
+                printf("33440,UFKMTAPEI,Ford,171.00,135\n");
+                break;
             default:
-                printf("Algoritmo invalido\n");
+                printf("Opcion invalida\n");
                 break;
         }
     } while(opcion != 7);
